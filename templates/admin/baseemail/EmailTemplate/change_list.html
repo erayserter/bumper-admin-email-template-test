@@ -1,0 +1,56 @@
+{% extends "admin/change_list.html" %}
+
+{% load static %}
+{% load i18n %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static 'baseemail/index.js' %}" defer></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'baseemail/style.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'baseemail/css/bootstrap.min.css' %}">
+{% endblock %}
+
+{% block object-tools %}
+    <ul class="object-tools d-flex align-items-center justify-content-center">
+        {% block object-tools-items %}
+            <li class="h-100">
+                <input type="submit" form="changelist-form" formaction="{% url 'admin:test-selected' %}" value="Test Without Email">
+            </li>
+            <li class="h-100">
+                <input type="submit" form="changelist-form" formaction="{% url 'admin:test-selected-email' %} value="Test Without Email">
+            </li>
+            <li class="h-100">
+                <input type="submit" form="changelist-form" formaction="{% url 'admin:test-selected-data' %} value="Test Without Email">
+            </li>
+            {{ block.super }}
+        {% endblock %}
+    </ul>
+{% endblock %}
+
+{% block content %}
+    {{ block.super }}
+    <div class="clear d-flex gap-5">
+        <div>
+            {{ email_template | safe }}
+        </div>
+        <table class="table h-100" style="margin-top: 32px">
+            <thead>
+                <tr>
+                    {% for param in param_list %}
+                        <th scope="col">{{ param }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for key, value in test_params.items %}
+                    <tr>
+                        <th scope="row">{{ key }}</th>
+                        {% for item in value %}
+                            <td>{{ item }}</td>
+                        {% endfor %}
+                    </tr>                
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

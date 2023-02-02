@@ -7,12 +7,6 @@ from baseemail.constants import EMAIL_CODES, EMAIL_TYPES
 from baseemail.models import Country, EmailTemplate, ObjectVariableMap
 
 
-class EmailActionForm(ActionForm):
-    email = forms.EmailField(widget=forms.EmailInput(attrs={
-        'id': 'email-action',
-    }), required=False)
-
-
 class CountryModelForm(forms.ModelForm):
     class Meta:
         model = Country

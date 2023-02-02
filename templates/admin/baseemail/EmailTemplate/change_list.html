@@ -14,13 +14,17 @@
     <ul class="object-tools d-flex align-items-center justify-content-center">
         {% block object-tools-items %}
             <li class="h-100">
+                <label for="email">Email: </label>
+                <input type="text" form="changelist-form" name="email">
+            </li>
+            <li class="h-100">
                 <input type="submit" form="changelist-form" formaction="{% url 'admin:test-selected' %}" value="Test Without Email">
             </li>
             <li class="h-100">
-                <input type="submit" form="changelist-form" formaction="{% url 'admin:test-selected-email' %} value="Test Without Email">
+                <input type="submit" form="changelist-form" formaction="{% url 'admin:test-selected-email' %}" value="Test With Email">
             </li>
             <li class="h-100">
-                <input type="submit" form="changelist-form" formaction="{% url 'admin:test-selected-data' %} value="Test Without Email">
+                <input type="submit" form="changelist-form" formaction="{% url 'admin:test-selected-data' %}" value="Test With Real Data">
             </li>
             {{ block.super }}
         {% endblock %}
@@ -33,24 +37,22 @@
         <div>
             {{ email_template | safe }}
         </div>
+{#        <pre>{{ fields }}</pre>#}
         <table class="table h-100" style="margin-top: 32px">
-            <thead>
-                <tr>
-                    {% for param in param_list %}
-                        <th scope="col">{{ param }}</th>
-                    {% endfor %}
-                </tr>
-            </thead>
-            <tbody>
-                {% for key, value in test_params.items %}
+            {% for fields in fields_array %}
+                <thead>
                     <tr>
-                        <th scope="row">{{ key }}</th>
-                        {% for item in value %}
-                            <td>{{ item }}</td>
+                        {% for field in fields %}
+                            <th scope="col">{{ field }}</th>
                         {% endfor %}
-                    </tr>                
-                {% endfor %}
-            </tbody>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for key, value in fields.items %}
+                        <td>{{ value }}</td>
+                    {% endfor %}
+                </tbody>
+            {% endfor %}
         </table>
     </div>
 {% endblock %}

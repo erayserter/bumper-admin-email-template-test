@@ -43,7 +43,7 @@ class EmailTemplate(models.Model):
     type = models.CharField(max_length=25, choices=EMAIL_TYPES, null=True, blank=True)
     related_model_application = models.TextField(blank=True, null=True, verbose_name="related model application")
     related_model_name = models.TextField(blank=True, null=True, verbose_name="related model name")
-    attachment_type = models.CharField(verbose_name="attachment type", blank=True, null=True, max_length = 200)
+    attachment_type = models.CharField(verbose_name="attachment type", blank=True, null=True, max_length=200)
     version = models.IntegerField()
     additional_parameters = models.TextField(blank=True, null=True, verbose_name="Additional parameters")
 

@@ -5,23 +5,46 @@ from django.template.loader import render_to_string
 from django.http import HttpResponseRedirect, HttpResponse
 from django.utils.html import format_html
 from django.urls import reverse
+from  django.core.exceptions import ObjectDoesNotExist
 
 import json
 
 from baseemail.models import EmailTemplate, Country, ObjectVariableMap
-from baseemail.forms import CountryModelForm, EmailTemplateModelForm, ObjectVariableMapModelForm, EmailActionForm
+from baseemail.forms import CountryModelForm, EmailTemplateModelForm, ObjectVariableMapModelForm
+
+
+def replace_variables(html):
+    html = html.replace("*|FORENAME|*", "Mehmet Eray Serter")
+    html = html.replace("*|CARD LAST 4|*", "0456")
+    html = html.replace("*|AMOUNT|*", "1000")
+    html = html.replace("*|DATE|*", "05/02/2023")
+    return html.replace("*|COMPANYNAME|*", "Bumper")
+
+
+def get_template_ovm_fields_json(template_id):
+    email_template = EmailTemplate.objects.get(pk=template_id)
+
+    try:
+        ovm = ObjectVariableMap.objects.get(
+            app_label=email_template.related_model_application,
+            model_name=email_template.related_model_name
+        )
+    except ObjectDoesNotExist as e:
+        print(f'Error: {e}')
+        return None
+
+    return json.loads(ovm.fields.replace("\'", "\""))
 
 
 class EmailTemplateModelAdmin(admin.ModelAdmin):
     form = EmailTemplateModelForm
-    action_form = EmailActionForm
 
     fieldsets = (
         (None, {
             'fields': (
                 'name', 'template_name', 'email_class', 'subject', 'contents', 'variables', 'row_variables',
-               'to_email', 'to_email_function', 'from_email', 'related_model_application', 'related_model_name',
-               'attachment_type', 'additional_parameters',
+                'to_email', 'to_email_function', 'from_email', 'related_model_application', 'related_model_name',
+                'attachment_type', 'additional_parameters',
             ),
             'classes': ('d-flex', 'flex-wrap', 'column-gap-3', ),
         }),
@@ -31,17 +54,15 @@ class EmailTemplateModelAdmin(admin.ModelAdmin):
         }),
     )
 
+    actions = ('action', )
+
     list_display = (
-        'id', 'name', 'template_name', 'email_class', 'subject', 'contents', 'variables', 'row_variables',
-        'to_email', 'to_email_function', 'from_email', 'related_model_application', 'related_model_name',
-        'attachment_type', 'additional_parameters', 'test_email_buttons',
+        'select_checkbox', 'id', 'name', 'template_name', 'email_class', 'subject', 'contents', 'variables',
+        'row_variables', 'to_email', 'to_email_function', 'from_email', 'related_model_application',
+        'related_model_name', 'attachment_type', 'additional_parameters', 'test_email_buttons',
     )
 
     list_per_page = 25
-
-    actions = (
-        'action',
-    )
 
     search_fields = ('name', )
 
@@ -59,78 +80,79 @@ class EmailTemplateModelAdmin(admin.ModelAdmin):
         return custom_urls + url
 
     def test_without_email_view(self, request, template_id):
-        email_template = EmailTemplate.objects.get(pk=template_id)
-
-        # email_template_content = {
-        #     "forename": "Mehmet Eray Serter",
-        #     "card last 4": "0456",
-        #     "amount": "1000",
-        #     "date": "05/02/2023",
-        #     "companyname": "Bumper",
-        # }
-
-        test_params = {
-            1: ["Mark", "Otto", "@mdo"],
-            2: ["Mark", "Otto", "@mdo"],
-            3: ["Mark", "Otto", "@mdo"],
-        }
-
-        param_list = [
-            "ID",
-            "First",
-            "Last",
-            "Handle"
-        ]
-
         template_string = render_to_string("admin/baseemail/EmailTemplate/emailtemplate.html")
+        template_string = replace_variables(template_string)
 
-        template_string = template_string.replace("*|FORENAME|*", "Mehmet Eray Serter")
-        template_string = template_string.replace("*|CARD LAST 4|*", "0456")
-        template_string = template_string.replace("*|AMOUNT|*", "1000")
-        template_string = template_string.replace("*|DATE|*", "05/02/2023")
-        template_string = template_string.replace("*|COMPANYNAME|*", "Bumper")
-
-        # for variable in email_template_content:
-        #     template_string = template_string.replace(f'*|{variable.upper()}|*', email_template_content[variable])
+        ovm_fields_json = get_template_ovm_fields_json(template_id)
 
         return super().changelist_view(request, extra_context={
             'email_template': template_string,
-            'test_params': test_params,
-            'param_list': param_list,
+            'fields_array': [ovm_fields_json],
         })
 
     def test_with_email_view(self, request, template_id):
-        pass
+        email = request.POST['email']
+
+        template_string = render_to_string("admin/baseemail/EmailTemplate/emailtemplate.html")
+        template_string = replace_variables(template_string)
+
+        ovm_fields_json = get_template_ovm_fields_json(template_id)
+
+        return super().changelist_view(request, extra_context={
+            'email_template': template_string,
+            'fields_array': [ovm_fields_json],
+        })
 
     def test_with_real_data_view(self, request, template_id):
-        pass
+        template_string = render_to_string("admin/baseemail/EmailTemplate/emailtemplate.html")
+        template_string = replace_variables(template_string)
+
+        ovm_fields_json = get_template_ovm_fields_json(template_id)
+
+        return super().changelist_view(request, extra_context={
+            'email_template': template_string,
+            'fields_array': [ovm_fields_json],
+        })
 
     def test_selected_without_email_view(self, request):
-        # queryset = EmailTemplate.objects.filter(pk__in=request.POST['_selected_action'])
-        # print(queryset)
-        return super().changelist_view(request)
+        queryset = EmailTemplate.objects.filter(pk__in=request.POST.getlist('selected'))
+        # queryset = EmailTemplate.objects.filter(pk__in=request.POST.getlist('_selected_action'))
+
+        fields_array = list(map(lambda query: get_template_ovm_fields_json(query.pk), queryset))
+
+        return super().changelist_view(request, extra_context={
+            'fields_array': fields_array,
+        })
 
     def test_selected_with_email_view(self, request):
-        # queryset = EmailTemplate.objects.filter(pk__in=request.POST['_selected_action'])
-        # print(queryset)
-        return super().changelist_view(request)
+        email = request.POST['email']
+        print(email)
+
+        queryset = EmailTemplate.objects.filter(pk__in=request.POST.getlist('_selected_action'))
+
+        fields_array = list(map(lambda query: get_template_ovm_fields_json(query.pk), queryset))
+
+        return super().changelist_view(request, extra_context={
+            'fields_array': fields_array,
+        })
 
     def test_selected_with_real_data_view(self, request):
-        # queryset = EmailTemplate.objects.filter(pk__in=request.POST['_selected_action'])
-        # print(queryset)
-        return super().changelist_view(request)
+        queryset = EmailTemplate.objects.filter(pk__in=request.POST.getlist('_selected_action'))
 
+        fields_array = list(map(lambda query: get_template_ovm_fields_json(query.pk), queryset))
 
+        return super().changelist_view(request, extra_context={
+            'fields_array': fields_array,
+        })
 
-
-
-
-
-
-
-
-    def action(self, request, queryset):
+    def action(self):
         pass
+
+    def select_checkbox(self, obj):
+        return format_html(
+            f'<input type="checkbox" name="selected" value="{obj.pk}">'
+        )
+    select_checkbox.short_description = "Select"
 
     def test_email_buttons(self, obj):
         return format_html(

@@ -1,3 +1,7 @@
+ul, li {
+    list-style: none !important;
+}
+
 .email-template-text-input {
     width: 20em;
 }

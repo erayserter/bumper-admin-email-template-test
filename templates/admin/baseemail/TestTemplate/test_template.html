@@ -1,0 +1,92 @@
+{% extends 'admin/base_site.html' %}
+
+{% load static %}
+
+{% block extrastyle %}
+    <script type="text/javascript" src="{% static 'baseemail/index.js' %}" defer></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'baseemail/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'baseemail/style.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="test-selected-buttons d-flex justify-content-between">
+                <div class="search d-flex justify-content-center align-items-center gap-2">
+                    <label for="search-input">Search:</label>
+                    <input id="search-input" type="text" onchange=""/>
+                </div>
+                <ul class="d-flex gap-5 justify-content-end">
+                    <li class="h-100">
+                        <label for="email-input">Email: </label>
+                        <input id="email-input" type="text" name="email">
+                    </li>
+                    <li class="h-100">
+                        <input type="submit" formaction="{% url 'admin:test-template-selected-test' %}" value="Test Selected Without Email">
+                    </li>
+                    <li class="h-100">
+                        <input type="submit" formaction="{% url 'admin:test-template-selected-email-test' %}" value="Test Selected With Email">
+                    </li>
+                    <li class="h-100">
+                        <input type="submit" formaction="{% url 'admin:test-template-selected-data-test' %}" value="Test Selected With Real Data">
+                    </li>
+                </ul>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>
+                            <input id="selected-all" type="checkbox">
+                        </th>
+                        {% for field in fields %}
+                            <th>{{ field.name }}</th>
+                        {% endfor %}
+                        <th>Test buttons</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for template_field_values in templates_field_values %}
+                        <tr>
+                            <td>
+                                {#TODO: buradaki id ye erisme degisecek#}
+                                <input type="checkbox" class="selected-row" name="selected" value="{{ template_field_values.0 }}">
+                            </td>
+                            {% for value in template_field_values %}
+                                <td>{{ value }}</td>
+                            {% endfor %}
+                            <td class="d-flex flex-column gap-1">
+                                {#TODO: buradaki id ye erisme degisecek#}
+                                <input class="w-100" type="submit" formaction="{% url 'admin:test-template-test' template_field_values.0 %}" value="Test Without Email">
+                                <input class="w-100" type="submit" formaction="{% url 'admin:test-template-email-test' template_field_values.0 %}" value="Test With Email">
+                                <input class="w-100" type="submit" formaction="{% url 'admin:test-template-data-test' template_field_values.0 %}" value="Test With Real Data">
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div class="d-flex gap-5">
+                <div>
+                    {{ email_template | safe }}
+                </div>
+                {% for ovm_fields in ovm_fields_list %}
+                    <table class="table h-100 w-auto" style="margin-top: 32px">
+                        <thead>
+
+                        </thead>
+                        <tbody>
+                            {% for key, value in ovm_fields.items %}
+                                <tr>
+                                    <td>{{ key }}</td>
+                                    <td>{{ value }}</td>
+                                </tr>
+                            {% endfor %}
+
+                        </tbody>
+                    </table>
+                {% endfor %}
+            </div>
+        </form>
+    </div>
+{% endblock %}
+

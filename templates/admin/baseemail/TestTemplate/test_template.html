@@ -14,8 +14,9 @@
             {% csrf_token %}
             <div class="test-selected-buttons d-flex justify-content-between">
                 <div class="search d-flex justify-content-center align-items-center gap-2">
-                    <label for="search-input">Search:</label>
-                    <input id="search-input" type="text" onchange=""/>
+{#                    <label for="search-input">Search:</label>#}
+                    <input id="search-input" type="text" name="search"/>
+                    <input type="submit" formaction="{% url 'admin:test-template' %}" formmethod="GET" value="Search">
                 </div>
                 <ul class="d-flex gap-5 justify-content-end">
                     <li class="h-100">
@@ -72,10 +73,12 @@
                 {% for ovm_fields in ovm_fields_list %}
                     <table class="table h-100 w-auto" style="margin-top: 32px">
                         <thead>
-
+                            <tr>
+                                <td colspan="2" class="fw-bold">{{ ovm_fields.template_name|upper }}</td>
+                            </tr>
                         </thead>
                         <tbody>
-                            {% for key, value in ovm_fields.items %}
+                            {% for key, value in ovm_fields.fields.items %}
                                 <tr>
                                     <td>{{ key }}</td>
                                     <td>{{ value }}</td>

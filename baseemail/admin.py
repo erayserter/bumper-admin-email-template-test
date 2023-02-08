@@ -10,14 +10,19 @@ from rest_framework.generics import RetrieveAPIView, CreateAPIView
 from baseemail.models import EmailTemplate, Country, ObjectVariableMap
 from baseemail.forms import CountryModelForm, EmailTemplateModelForm, ObjectVariableMapModelForm
 from baseemail.helpers import render_site_with_context, replace_variables, get_template_ovm_fields_json
+from baseemail.serializers import EmailTemplateSerializer
 
 
 class TestTemplateAPIView(RetrieveAPIView):
+    serializer_class = EmailTemplateSerializer
+
     def get(self, request, *args, **kwargs):
         return render_site_with_context(request)
 
 
 class TestTemplateWithoutEmailAPIView(CreateAPIView):
+    serializer_class = EmailTemplateSerializer
+
     def post(self, request, template_id=None, *args, **kwargs):
         template_id = self.kwargs.get('template_id')
 
@@ -47,6 +52,8 @@ class TestTemplateWithoutEmailAPIView(CreateAPIView):
 
 
 class TestTemplateWithEmailAPIView(CreateAPIView):
+    serializer_class = EmailTemplateSerializer
+
     def post(self, request, template_id=None, *args, **kwargs):
         email = request.POST['email']
         template_id = self.kwargs.get('template_id')
@@ -77,6 +84,8 @@ class TestTemplateWithEmailAPIView(CreateAPIView):
 
 
 class TestTemplateWithDataAPIView(CreateAPIView):
+    serializer_class = EmailTemplateSerializer
+
     def post(self, request, template_id=None, *args, **kwargs):
         template_id = self.kwargs.get('template_id')
 
@@ -108,6 +117,8 @@ class TestTemplateWithDataAPIView(CreateAPIView):
 
 
 class TestTemplateSelectedWithoutEmailAPIView(CreateAPIView):
+    serializer_class = EmailTemplateSerializer
+
     def post(self, request, *args, **kwargs):
         queryset = EmailTemplate.objects.filter(pk__in=request.POST.getlist('selected'))
 
@@ -132,6 +143,8 @@ class TestTemplateSelectedWithoutEmailAPIView(CreateAPIView):
 
 
 class TestTemplateSelectedWithEmailAPIView(CreateAPIView):
+    serializer_class = EmailTemplateSerializer
+
     def post(self, request, *args, **kwargs):
         email = request.POST['email']
 
@@ -158,6 +171,8 @@ class TestTemplateSelectedWithEmailAPIView(CreateAPIView):
 
 
 class TestTemplateSelectedWithDataAPIView(CreateAPIView):
+    serializer_class = EmailTemplateSerializer
+
     def post(self, request, *args, **kwargs):
         queryset = EmailTemplate.objects.filter(pk__in=request.POST.getlist('selected'))
 

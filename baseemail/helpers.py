@@ -3,6 +3,7 @@ import ast
 from django.shortcuts import render
 
 from baseemail.models import ObjectVariableMap, EmailTemplate
+from baseemail.serializers import EmailTemplateSerializer
 
 import json
 
@@ -48,7 +49,6 @@ def render_site_with_context(request, extra_context=None):
     templates_field_values = email_templates.values_list(*value_fields)
 
     context = {
-        'email_templates': email_templates,
         'templates_field_values': templates_field_values,
         'fields': all_fields,
     }

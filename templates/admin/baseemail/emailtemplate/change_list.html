@@ -1,9 +1,11 @@
-{% extends "admin/change_form.html" %}
+{% extends "admin/change_list.html" %}
 
 {% load static %}
+{% load i18n %}
 
 {% block extrastyle %}
     {{ block.super }}
+    <script type="text/javascript" src="{% static 'baseemail/index.js' %}" defer></script>
     <link rel="stylesheet" type="text/css" href="{% static 'baseemail/style.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'baseemail/css/bootstrap.min.css' %}">
 {% endblock %}

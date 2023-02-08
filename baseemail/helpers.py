@@ -1,3 +1,5 @@
+import ast
+
 from django.shortcuts import render
 
 from baseemail.models import ObjectVariableMap, EmailTemplate
@@ -23,15 +25,15 @@ def get_template_ovm_fields_json(email_template):
         print(f'Error: {e} Email Template pk: {email_template.pk}')
         return None
 
-    ovm_fields = json.loads(ovm.fields.replace("\'", "\""))
+    fields_json_format = ast.literal_eval(ovm.fields)
 
-    for field in ovm_fields:
-        if ovm_fields[field] == "" or ovm_fields[field].isspace():
-            ovm_fields[field] = None
+    for field in fields_json_format:
+        if fields_json_format[field] == "" or fields_json_format[field].isspace():
+            fields_json_format[field] = None
 
     return {
         'template_name': email_template.name,
-        'fields': ovm_fields,
+        'fields': fields_json_format,
     }
 
 
@@ -54,4 +56,4 @@ def render_site_with_context(request, extra_context=None):
     if extra_context is not None:
         context.update(extra_context)
 
-    return render(request, 'admin/baseemail/TestTemplate/test_template.html', context=context)
+    return render(request, 'admin/baseemail/testtemplate/test_template.html', context=context)

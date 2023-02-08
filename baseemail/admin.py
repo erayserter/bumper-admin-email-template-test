@@ -1,62 +1,74 @@
 from django.contrib import admin, messages
 from django.urls import path, re_path
 from django.template.loader import render_to_string
+from django.http.response import HttpResponseRedirect
+from django.urls import reverse
 
 from rest_framework.views import APIView
+from rest_framework.generics import RetrieveAPIView, CreateAPIView
 
 from baseemail.models import EmailTemplate, Country, ObjectVariableMap
 from baseemail.forms import CountryModelForm, EmailTemplateModelForm, ObjectVariableMapModelForm
 from baseemail.helpers import render_site_with_context, replace_variables, get_template_ovm_fields_json
 
 
-class TestTemplateAPIView(APIView):
+class TestTemplateAPIView(RetrieveAPIView):
     def get(self, request, *args, **kwargs):
         return render_site_with_context(request)
 
 
-class TestTemplateWithoutEmailAPIView(APIView):
-    def post(self, request, template_id):
+class TestTemplateWithoutEmailAPIView(CreateAPIView):
+    def post(self, request, template_id=None, *args, **kwargs):
+        template_id = self.kwargs.get('template_id')
+
         try:
             email_template = EmailTemplate.objects.get(pk=template_id)
         except Exception as e:
             print(f'Error: {e} Email Template ID: {template_id}')
-            return render_site_with_context(request)
+            return HttpResponseRedirect(reverse('admin:test-template'))
 
-        template_string = render_to_string("admin/baseemail/EmailTemplate/emailtemplate.html")
+        # TODO: get html template from AWS S3
+        try:
+            template_string = render_to_string(f'admin/baseemail/emailtemplate/{email_template.template_name}.html')
+        except Exception as e:
+            print(f'Error: {e} Email Template ID: {template_id}')
+            return HttpResponseRedirect(reverse('admin:test-template'))
 
         ovm_fields_json = get_template_ovm_fields_json(email_template)
 
         if ovm_fields_json is None:
             messages.error(request, "This template does not matched with an ovm.")
-            return render_site_with_context(request)
+            return HttpResponseRedirect(reverse('admin:test-template'))
 
         return render_site_with_context(request, extra_context={
             'email_template': template_string,
             'ovm_fields_list': [ovm_fields_json],
         })
 
-    def get(self, request):
-        return render_site_with_context(request)
 
-
-class TestTemplateWithEmailAPIView(APIView):
-    def post(self, request, template_id):
+class TestTemplateWithEmailAPIView(CreateAPIView):
+    def post(self, request, template_id=None, *args, **kwargs):
         email = request.POST['email']
-        print(email)
+        template_id = self.kwargs.get('template_id')
 
+        # TODO: get html template from AWS S3
         try:
             email_template = EmailTemplate.objects.get(pk=template_id)
         except Exception as e:
             print(f'Error: {e} Email Template ID: {template_id}')
-            return render_site_with_context(request)
+            return HttpResponseRedirect(reverse('admin:test-template'))
 
-        template_string = render_to_string("admin/baseemail/EmailTemplate/emailtemplate.html")
+        try:
+            template_string = render_to_string(f'admin/baseemail/emailtemplate/{email_template.template_name}.html')
+        except Exception as e:
+            print(f'Error: {e} Email Template ID: {template_id}')
+            return HttpResponseRedirect(reverse('admin:test-template'))
 
         ovm_fields_json = get_template_ovm_fields_json(email_template)
 
         if ovm_fields_json is None:
             messages.error(request, "This template does not matched with an ovm.")
-            return render_site_with_context(request)
+            return HttpResponseRedirect(reverse('admin:test-template'))
 
         return render_site_with_context(request, extra_context={
             'email_template': template_string,
@@ -64,15 +76,22 @@ class TestTemplateWithEmailAPIView(APIView):
         })
 
 
-class TestTemplateWithDataAPIView(APIView):
-    def post(self, request, template_id):
+class TestTemplateWithDataAPIView(CreateAPIView):
+    def post(self, request, template_id=None, *args, **kwargs):
+        template_id = self.kwargs.get('template_id')
+
+        # TODO: get html template from AWS S3
         try:
             email_template = EmailTemplate.objects.get(pk=template_id)
         except Exception as e:
             print(f'Error: {e} Email Template ID: {template_id}')
-            return render_site_with_context(request)
+            return HttpResponseRedirect(reverse('admin:test-template'))
 
-        template_string = render_to_string("admin/baseemail/EmailTemplate/emailtemplate.html")
+        try:
+            template_string = render_to_string(f'admin/baseemail/emailtemplate/{email_template.template_name}.html')
+        except Exception as e:
+            print(f'Error: {e} Email Template ID: {template_id}')
+            return HttpResponseRedirect(reverse('admin:test-template'))
 
         ovm_fields_json = get_template_ovm_fields_json(email_template)
 
@@ -80,7 +99,7 @@ class TestTemplateWithDataAPIView(APIView):
             template_string = replace_variables(template_string, ovm_fields_json.get('fields'))
         else:
             messages.error(request, "This template does not matched with an ovm.")
-            return render_site_with_context(request)
+            return HttpResponseRedirect(reverse('admin:test-template'))
 
         return render_site_with_context(request, extra_context={
             'email_template': template_string,
@@ -88,78 +107,74 @@ class TestTemplateWithDataAPIView(APIView):
         })
 
 
-class TestTemplateSelectedWithoutEmailAPIView(APIView):
-    def post(self, request):
+class TestTemplateSelectedWithoutEmailAPIView(CreateAPIView):
+    def post(self, request, *args, **kwargs):
         queryset = EmailTemplate.objects.filter(pk__in=request.POST.getlist('selected'))
 
         ovm_fields_list = []
 
-        for query in queryset:
-            ovm_fields = get_template_ovm_fields_json(query)
-            if ovm_fields is not None:
-                ovm_fields_list.append(ovm_fields)
-
-        if len(queryset) <= 0:
+        if queryset:
+            for query in queryset:
+                ovm_fields = get_template_ovm_fields_json(query)
+                if ovm_fields is not None:
+                    ovm_fields_list.append(ovm_fields)
+        else:
             messages.error(request, "You should first select templates to test them.")
-            return render_site_with_context(request)
+            return HttpResponseRedirect(reverse('admin:test-template'))
 
-        if len(ovm_fields_list) <= 0:
+        if not ovm_fields_list:
             messages.error(request, "Selected templates does not matched with an ovm.")
-            return render_site_with_context(request)
+            return HttpResponseRedirect(reverse('admin:test-template'))
 
         return render_site_with_context(request, extra_context={
             'ovm_fields_list': ovm_fields_list,
         })
 
-    def get(self, request):
-        return render_site_with_context(request)
 
-
-class TestTemplateSelectedWithEmailAPIView(APIView):
-    def post(self, request):
+class TestTemplateSelectedWithEmailAPIView(CreateAPIView):
+    def post(self, request, *args, **kwargs):
         email = request.POST['email']
-        print(email)
 
         queryset = EmailTemplate.objects.filter(pk__in=request.POST.getlist('selected'))
 
         ovm_fields_list = []
 
-        for query in queryset:
-            ovm_fields = get_template_ovm_fields_json(query)
-            if ovm_fields is not None:
-                ovm_fields_list.append(ovm_fields)
-
-        if len(queryset) <= 0:
+        if queryset:
+            for query in queryset:
+                ovm_fields = get_template_ovm_fields_json(query)
+                if ovm_fields is not None:
+                    ovm_fields_list.append(ovm_fields)
+        else:
             messages.error(request, "You should first select templates to test them.")
-            return render_site_with_context(request)
+            return HttpResponseRedirect(reverse('admin:test-template'))
 
-        if len(ovm_fields_list) <= 0:
+        if not ovm_fields_list:
             messages.error(request, "Selected templates does not matched with an ovm.")
-            return render_site_with_context(request)
+            return HttpResponseRedirect(reverse('admin:test-template'))
 
         return render_site_with_context(request, extra_context={
             'ovm_fields_list': ovm_fields_list,
         })
 
 
-class TestTemplateSelectedWithDataAPIView(APIView):
-    def post(self, request):
+class TestTemplateSelectedWithDataAPIView(CreateAPIView):
+    def post(self, request, *args, **kwargs):
         queryset = EmailTemplate.objects.filter(pk__in=request.POST.getlist('selected'))
 
         ovm_fields_list = []
 
-        for query in queryset:
-            ovm_fields = get_template_ovm_fields_json(query)
-            if ovm_fields is not None:
-                ovm_fields_list.append(ovm_fields)
-
-        if len(queryset) <= 0:
+        if queryset:
+            for query in queryset:
+                ovm_fields = get_template_ovm_fields_json(query)
+                if ovm_fields is not None:
+                    ovm_fields_list.append(ovm_fields)
+        else:
             messages.error(request, "You should first select templates to test them.")
-            return render_site_with_context(request)
+            return HttpResponseRedirect(reverse('admin:test-template'))
 
-        if len(ovm_fields_list) <= 0:
+        if not ovm_fields_list:
             messages.error(request, "Selected templates does not matched with an ovm.")
-            return render_site_with_context(request)
+            return HttpResponseRedirect(reverse('admin:test-template'))
 
         return render_site_with_context(request, extra_context={
             'ovm_fields_list': ovm_fields_list,

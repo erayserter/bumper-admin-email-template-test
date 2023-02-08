@@ -5,13 +5,9 @@ from baseemail.models import ObjectVariableMap, EmailTemplate
 import json
 
 
-def is_empty_or_whitespace(string):
-    return string == "" or string.isspace()
-
-
 def replace_variables(html, merge_variables):
     for var in merge_variables:
-        if not is_empty_or_whitespace(merge_variables[var]):
+        if merge_variables[var] is not None:
             html = html.replace(f'*|{var}|*', merge_variables[var])
 
     return html
@@ -30,7 +26,7 @@ def get_template_ovm_fields_json(email_template):
     ovm_fields = json.loads(ovm.fields.replace("\'", "\""))
 
     for field in ovm_fields:
-        if is_empty_or_whitespace(ovm_fields[field]):
+        if ovm_fields[field] == "" or ovm_fields[field].isspace():
             ovm_fields[field] = None
 
     return {

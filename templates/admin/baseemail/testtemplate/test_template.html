@@ -3,8 +3,10 @@
 {% load static %}
 
 {% block extrastyle %}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous" defer></script>
+
     <script type="text/javascript" src="{% static 'baseemail/index.js' %}" defer></script>
-    <link rel="stylesheet" type="text/css" href="{% static 'baseemail/css/bootstrap.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'baseemail/style.css' %}">
 {% endblock %}
 
@@ -12,54 +14,81 @@
     <div>
         <form method="POST">
             {% csrf_token %}
-            <div class="test-selected-buttons d-flex justify-content-between">
+            <div class="test-selected-buttons d-flex justify-content-between mb-3">
                 <div class="search d-flex justify-content-center align-items-center gap-2">
                     <input id="search-input" type="text" name="search"/>
-                    <input type="submit" formaction="{% url 'admin:test-template' %}" formmethod="GET" value="Search">
+                    <input type="submit" formaction="{% url 'admin:test_template' %}" formmethod="GET" value="Search">
                 </div>
-                <ul class="d-flex gap-5 justify-content-end">
-                    <li class="h-100">
+                <ul class="d-flex gap-5 justify-content-end align-items-center m-0">
+                    <li>
                         <label for="email-input">Email: </label>
                         <input id="email-input" type="text" name="email">
                     </li>
-                    <li class="h-100">
-                        <input type="submit" formaction="{% url 'admin:test-template-selected-test' %}" value="Test Selected Without Email">
+                    <li>
+                        <button type="submit" class="modal-button btn btn-primary" formaction="{% url 'admin:test_selected_without_email' %}" formmethod="POST">Test Selected Without Email</button>
                     </li>
-                    <li class="h-100">
-                        <input type="submit" formaction="{% url 'admin:test-template-selected-email-test' %}" value="Test Selected With Email">
+                    <li>
+                        <a type="button" class="modal-button btn btn-danger" data-bs-toggle="modal" data-bs-target="#multi-test-modal">Test Selected With Email</a>
                     </li>
-                    <li class="h-100">
-                        <input type="submit" formaction="{% url 'admin:test-template-selected-data-test' %}" value="Test Selected With Real Data">
+                    <li>
+                        <button type="submit" class="modal-button btn btn-success" formaction="{% url 'admin:test_selected_with_data' %}" formmethod="POST">Test Selected With Real Data</button>
                     </li>
                 </ul>
             </div>
             <table>
                 <thead>
                     <tr>
-                        <th>
-                            <input id="selected-all" type="checkbox">
-                        </th>
-                        {% for field in fields %}
-                            <th>{{ field.name }}</th>
-                        {% endfor %}
-                        <th>Test buttons</th>
+                        <th><input id="selected-all" type="checkbox"></th>
+                        <th>Name</th>
+                        <th>Template Name</th>
+                        <th>Subject</th>
+                        <th>Country</th>
+                        <th>From Email</th>
+                        <th>To Email</th>
+                        <th>Related Model Application</th>
+                        <th>Related Model Name</th>
+                        <th>Additional Parameters</th>
+                        <th>Active Status</th>
+                        <th>Test Buttons</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for template_field_values in templates_field_values %}
+                    {% for obj in email_templates_obj %}
                         <tr>
                             <td>
-                                {#TODO: buradaki id ye erisme degisecek#}
-                                <input type="checkbox" class="selected-row" name="selected" value="{{ template_field_values.0 }}">
+                                <input type="checkbox" class="selected-row" name="selected" value="{{ obj.id }}">
                             </td>
-                            {% for value in template_field_values %}
-                                <td>{{ value }}</td>
-                            {% endfor %}
-                            <td class="d-flex flex-column gap-1">
-                                {#TODO: buradaki id ye erisme degisecek#}
-                                <input class="w-100" type="submit" formaction="{% url 'admin:test-template-test' template_field_values.0 %}" value="Test Without Email">
-                                <input class="w-100" type="submit" formaction="{% url 'admin:test-template-email-test' template_field_values.0 %}" value="Test With Email">
-                                <input class="w-100" type="submit" formaction="{% url 'admin:test-template-data-test' template_field_values.0 %}" value="Test With Real Data">
+                            <td>{{ obj.name }}</td>
+                            <td>{{ obj.template_name }}</td>
+                            <td>{{ obj.subject }}</td>
+                            <td>{{ obj.country.code }}</td>
+                            <td>{{ obj.from_email }}</td>
+                            <td>{{ obj.to_email }}</td>
+                            <td>{{ obj.related_model_application }}</td>
+                            <td>{{ obj.related_model_name }}</td>
+                            <td>{{ obj.additional_parameters }}</td>
+                            <td>{{ obj.active_status }}</td>
+                            <td class="d-flex gap-1">
+                                <button class="modal-button btn btn-primary" type="submit" formaction="{% url 'admin:test_without_email' obj.id %}" formmethod="POST">Test Without Email</button>
+                                <a class="modal-button btn btn-danger" type="button" data-bs-toggle="modal" data-bs-target="#test-with-email-{{ obj.id }}">Test With Email</a>
+                                <button class="modal-button btn btn-success" type="submit" formaction="{% url 'admin:test_with_data' obj.id %}" formmethod="POST">Test With Real Data</button>
+                                <div class="modal fade" id="test-with-email-{{ obj.id }}" tabindex="-1" aria-labelledby="single-test-modal--label" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h1 class="modal-title fs-5" id="single-test-modal--label">Warning</h1>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                You are going to send {{ obj.template_name }} to corresponding email.
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-success" data-bs-dismiss="modal">Close</button>
+                                                <button type="submit" class="btn btn-danger" formaction="{% url 'admin:test_with_email' obj.id %}">Send</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                     {% endfor %}
@@ -83,10 +112,26 @@
                                     <td>{{ value }}</td>
                                 </tr>
                             {% endfor %}
-
                         </tbody>
                     </table>
                 {% endfor %}
+            </div>
+            <div class="modal fade" id="multi-test-modal" tabindex="-1" aria-labelledby="multi-test-modal--label" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="multi-test-modal--label">Warning</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            You are going to send {{ obj.template_name }} to corresponding email.
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-success" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-danger" formaction="{% url 'admin:test_selected_with_email' %}" value="Test Selected With Email">Test Selected With Email</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </form>
     </div>

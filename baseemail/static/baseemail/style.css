@@ -2,6 +2,13 @@ ul, li {
     list-style: none !important;
 }
 
-.email-template-text-input {
-    width: 20em;
+.email-template-textarea {
+    width: 40em;
+    height: 10em;
+    resize: none;
+}
+
+.modal-button {
+    font-size: inherit;
+    color: #fff;
 }

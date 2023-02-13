@@ -25,7 +25,7 @@
                         <input id="email-input" type="text" name="email">
                     </li>
                     <li>
-                        <button type="submit" class="modal-button btn btn-primary" formaction="{% url 'admin:test_selected_without_email' %}" formmethod="POST">Test Selected Without Email</button>
+                        <button type="submit" class="modal-button btn btn-primary" formaction="{% url 'admin:test_selected_without_email' %}" formmethod="POST">Test Selected</button>
                     </li>
                     <li>
                         <a type="button" class="modal-button btn btn-danger" data-bs-toggle="modal" data-bs-target="#multi-test-modal">Test Selected With Email</a>
@@ -69,7 +69,7 @@
                             <td>{{ obj.additional_parameters }}</td>
                             <td>{{ obj.active_status }}</td>
                             <td class="d-flex gap-1">
-                                <button class="modal-button btn btn-primary" type="submit" formaction="{% url 'admin:test_without_email' obj.id %}" formmethod="POST">Test Without Email</button>
+                                <button class="modal-button btn btn-primary" type="submit" formaction="{% url 'admin:test_without_email' obj.id %}" formmethod="POST">Test</button>
                                 <a class="modal-button btn btn-danger" type="button" data-bs-toggle="modal" data-bs-target="#test-with-email-{{ obj.id }}">Test With Email</a>
                                 <button class="modal-button btn btn-success" type="submit" formaction="{% url 'admin:test_with_data' obj.id %}" formmethod="POST">Test With Real Data</button>
                                 <div class="modal fade" id="test-with-email-{{ obj.id }}" tabindex="-1" aria-labelledby="single-test-modal--label" aria-hidden="true">
@@ -84,7 +84,7 @@
                                             </div>
                                             <div class="modal-footer">
                                                 <button type="button" class="btn btn-success" data-bs-dismiss="modal">Close</button>
-                                                <button type="submit" class="btn btn-danger" formaction="{% url 'admin:test_with_email' obj.id %}">Send</button>
+                                                <button type="submit" class="btn btn-danger" formaction="{% url 'admin:test_with_email' obj.id %}">Send Email</button>
                                             </div>
                                         </div>
                                     </div>
@@ -128,7 +128,7 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-success" data-bs-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-danger" formaction="{% url 'admin:test_selected_with_email' %}" value="Test Selected With Email">Test Selected With Email</button>
+                            <button type="submit" class="btn btn-danger" formaction="{% url 'admin:test_selected_with_email' %}" value="Test Selected With Email">Send Email</button>
                         </div>
                     </div>
                 </div>

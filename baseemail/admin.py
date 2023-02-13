@@ -99,7 +99,7 @@ class TestTemplateWithDataAPIView(CreateAPIView):
         if not ovm_fields_json:
             return redirect(reverse('admin:test_template'))
 
-        template_string = replace_variables(request, template_string, ovm_fields_json.get('fields'))
+        template_string = replace_variables(request, email_template, template_string, ovm_fields_json.get('fields'))
 
         return render_site_with_context(request, extra_context={
             'email_template': template_string,
@@ -144,15 +144,15 @@ class TestTemplateSelectedWithEmailAPIView(CreateAPIView):
 
         queryset = EmailTemplate.objects.filter(pk__in=request.POST.getlist('selected'))
 
+        if not queryset:
+            messages.error(request, "You should first select templates to test them.")
+            return redirect(reverse('admin:test_template'))
+
         ovm_fields_list = []
 
         for query in queryset:
             ovm_fields = get_template_ovm_fields_json(request, query)
             ovm_fields_list.append(ovm_fields) if ovm_fields is not None else None
-
-        if not queryset:
-            messages.error(request, "You should first select templates to test them.")
-            return redirect(reverse('admin:test_template'))
 
         if ovm_fields_list:
             # TODO: .send_email() will be added
@@ -168,15 +168,18 @@ class TestTemplateSelectedWithDataAPIView(CreateAPIView):
     def post(self, request, *args, **kwargs):
         queryset = EmailTemplate.objects.filter(pk__in=request.POST.getlist('selected'))
 
+        if not queryset:
+            messages.error(request, "You should first select templates to test them.")
+            return redirect(reverse('admin:test_template'))
+
         ovm_fields_list = []
 
         for query in queryset:
             ovm_fields = get_template_ovm_fields_json(request, query)
-            ovm_fields_list.append(ovm_fields)
-
-        if not queryset:
-            messages.error(request, "You should first select templates to test them.")
-            return redirect(reverse('admin:test_template'))
+            if ovm_fields is not None:
+                ovm_fields_list.append(ovm_fields)
+                template_string = render_to_string(f'admin/baseemail/emailtemplate/{ovm_fields.get("template").template_name}.html')
+                replace_variables(request, query, template_string, ovm_fields.get('fields'))
 
         return render_site_with_context(request, extra_context={
             'ovm_fields_list': ovm_fields_list,

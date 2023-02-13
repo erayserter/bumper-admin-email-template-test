@@ -8,7 +8,7 @@ from baseemail.models import ObjectVariableMap, EmailTemplate
 import re
 
 
-def replace_variables(request, html, merge_variables):
+def replace_variables(request, email_template, html, merge_variables):
     for var in merge_variables:
         if merge_variables[var] is not None:
             html = html.replace(f'*|{var}|*', merge_variables[var])
@@ -17,7 +17,7 @@ def replace_variables(request, html, merge_variables):
     not_found_list = re.findall(r'\*\|(.+)\|\*', html)
 
     if not_found_list:
-        messages.error(request, f'{not_found_list} variable(s) not found in merge variables')
+        messages.error(request, f'{email_template.template_name.upper()}: {not_found_list} variable(s) not found in merge variables')
 
     return html
 
@@ -39,7 +39,7 @@ def get_template_ovm_fields_json(request, email_template):
             fields_json_format[field] = None
 
     return {
-        'template_name': email_template.name,
+        'template': email_template,
         'fields': fields_json_format,
     }
 

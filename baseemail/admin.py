@@ -54,14 +54,13 @@ class TestTemplateWithEmailAPIView(CreateAPIView):
 
     def post(self, request, id=None, *args, **kwargs):
         email = request.POST['email']
+        template_id = self.kwargs.get('id')
 
         try:
             validate_email(email)
         except Exception as e:
             messages.error(request, 'Invalid Email.')
             return redirect(reverse('admin:test_template'))
-
-        template_id = self.kwargs.get('id')
 
         # TODO: get html template from AWS S3
         try:
@@ -74,8 +73,8 @@ class TestTemplateWithEmailAPIView(CreateAPIView):
         ovm_fields_json = get_template_ovm_fields_json(request, email_template)
 
         if ovm_fields_json:
-            print('email has been sent')
             # TODO: .send_email() will be added
+            messages.success(request, "Email successfully sent.")
 
         return redirect(reverse('admin:test_template'))
 
@@ -117,11 +116,11 @@ class TestTemplateSelectedWithoutEmailAPIView(CreateAPIView):
 
         ovm_fields_list = []
 
-        if queryset:
-            for query in queryset:
-                ovm_fields = get_template_ovm_fields_json(request, query)
-                ovm_fields_list.append(ovm_fields)
-        else:
+        for query in queryset:
+            ovm_fields = get_template_ovm_fields_json(request, query)
+            ovm_fields_list.append(ovm_fields)
+
+        if not queryset:
             messages.error(request, "You should first select templates to test them.")
             return redirect(reverse('admin:test_template'))
 
@@ -147,17 +146,17 @@ class TestTemplateSelectedWithEmailAPIView(CreateAPIView):
 
         ovm_fields_list = []
 
-        if queryset:
-            for query in queryset:
-                ovm_fields = get_template_ovm_fields_json(request, query)
-                ovm_fields_list.append(ovm_fields) if ovm_fields is not None else None
-        else:
+        for query in queryset:
+            ovm_fields = get_template_ovm_fields_json(request, query)
+            ovm_fields_list.append(ovm_fields) if ovm_fields is not None else None
+
+        if not queryset:
             messages.error(request, "You should first select templates to test them.")
             return redirect(reverse('admin:test_template'))
 
         if ovm_fields_list:
             # TODO: .send_email() will be added
-            print('email has been sent')
+            messages.success(request, "Email successfully sent.")
 
         return redirect(reverse('admin:test_template'))
 
@@ -171,11 +170,11 @@ class TestTemplateSelectedWithDataAPIView(CreateAPIView):
 
         ovm_fields_list = []
 
-        if queryset:
-            for query in queryset:
-                ovm_fields = get_template_ovm_fields_json(request, query)
-                ovm_fields_list.append(ovm_fields)
-        else:
+        for query in queryset:
+            ovm_fields = get_template_ovm_fields_json(request, query)
+            ovm_fields_list.append(ovm_fields)
+
+        if not queryset:
             messages.error(request, "You should first select templates to test them.")
             return redirect(reverse('admin:test_template'))
 
@@ -195,15 +194,15 @@ class EmailTemplateModelAdmin(admin.ModelAdmin):
             'classes': ('d-flex', 'flex-wrap', 'column-gap-3',),
         }),
         (None, {
+            'fields': ('code', 'country', 'type', 'version', 'active_status',),
+            'classes': ('d-flex', 'flex-wrap', 'column-gap-3',),
+        }),
+        (None, {
             'fields': (
                 'template_name', 'subject', 'contents',
                 'to_email', 'to_email_function', 'from_email', 'related_model_application', 'related_model_name',
                 'additional_parameters',
             ),
-            'classes': ('d-flex', 'flex-wrap', 'column-gap-3', ),
-        }),
-        (None, {
-            'fields': ('code', 'country', 'type', 'version', 'active_status', ),
             'classes': ('d-flex', 'flex-wrap', 'column-gap-3', ),
         }),
     )

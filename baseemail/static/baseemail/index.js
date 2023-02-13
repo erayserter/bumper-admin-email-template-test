@@ -6,9 +6,4 @@ allCheckbox.addEventListener('change', (e) => {
     for (let i = 0; i < rowCheckboxes.length; i++) {
        rowCheckboxes[i].checked = e.target.checked;
     }
-}
-)
-
-function search(e) {
-    e.target.textContent
-}
+});

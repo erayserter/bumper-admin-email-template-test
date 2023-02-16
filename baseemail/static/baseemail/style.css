@@ -10,5 +10,34 @@ ul, li {
 
 .modal-button {
     font-size: inherit;
+    color: #fff !important;
+}
+
+#templates_length label {
     color: #fff;
+}
+
+#templates_length select {
+    background-color: #fff;
+}
+
+#templates_filter label {
+    color: #fff;
+}
+
+#templates_filter input {
+    background: #fff;
+}
+
+#templates_info {
+    color: #fff;
+}
+
+#templates_paginate {
+    color: #fff;
+    background-color: #fff;
+}
+
+#templates_paginate span {
+    color: #17a2b8;
 }

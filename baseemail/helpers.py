@@ -17,7 +17,7 @@ def replace_variables(request, email_template, html, merge_variables):
     not_found_list = re.findall(r'\*\|(.+)\|\*', html)
 
     if not_found_list:
-        messages.error(request, f'{email_template.template_name.upper()}: {not_found_list} variable(s) not found in merge variables')
+        messages.warning(request, f'{email_template.template_name.upper()}: {not_found_list} variable(s) not found in merge variables')
 
     return html
 
@@ -45,13 +45,8 @@ def get_template_ovm_fields_json(request, email_template):
 
 
 def render_site_with_context(request, extra_context=None):
-    email_templates_obj = EmailTemplate.objects.all()
-
-    if request.GET.get('search') is not None:
-        email_templates_obj = email_templates_obj.filter(name__icontains=request.GET['search'])
-
     context = {
-        'email_templates_obj': email_templates_obj,
+        'email_template_objs': EmailTemplate.objects.all(),
     }
 
     if extra_context:

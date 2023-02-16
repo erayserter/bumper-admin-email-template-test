@@ -3,103 +3,104 @@
 {% load static %}
 
 {% block extrastyle %}
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous" defer></script>
-
-    <script type="text/javascript" src="{% static 'baseemail/index.js' %}" defer></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.13.2/b-2.3.4/cr-1.6.1/r-2.4.0/sb-1.4.0/sl-1.6.0/datatables.min.css"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'baseemail/css/base.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'baseemail/style.css' %}">
 {% endblock %}
 
 {% block content %}
-    <div>
-        <form method="POST">
-            {% csrf_token %}
-            <div class="test-selected-buttons d-flex justify-content-between mb-3">
-                <div class="search d-flex justify-content-center align-items-center gap-2">
-                    <input id="search-input" type="text" name="search"/>
-                    <input type="submit" formaction="{% url 'admin:test_template' %}" formmethod="GET" value="Search">
-                </div>
-                <ul class="d-flex gap-5 justify-content-end align-items-center m-0">
-                    <li>
-                        <label for="email-input">Email: </label>
-                        <input id="email-input" type="text" name="email">
-                    </li>
-                    <li>
-                        <button type="submit" class="modal-button btn btn-primary" formaction="{% url 'admin:test_selected_without_email' %}" formmethod="POST">Test Selected</button>
-                    </li>
-                    <li>
-                        <a type="button" class="modal-button btn btn-danger" data-bs-toggle="modal" data-bs-target="#multi-test-modal">Test Selected With Email</a>
-                    </li>
-                    <li>
-                        <button type="submit" class="modal-button btn btn-success" formaction="{% url 'admin:test_selected_with_data' %}" formmethod="POST">Test Selected With Real Data</button>
-                    </li>
-                </ul>
-            </div>
-            <table>
-                <thead>
+    <form method="POST">
+        {% csrf_token %}
+        <div class="test-selected-buttons d-flex justify-content-end mb-3">
+            <ul class="d-flex justify-content-end align-items-center m-0">
+                <li>
+                    <label for="email-input" style="color:#fff;">Email: </label>
+                    <input class="ml-1" id="email-input" type="text" name="email">
+                </li>
+                <li class="ml-4">
+                    <button type="submit" class="modal-button btn btn-primary" formaction="{% url 'admin:test_selected_without_email' %}" formmethod="POST">Test Selected</button>
+                </li>
+                <li class="ml-4">
+                    <a type="button" class="modal-button btn btn-danger" data-toggle="modal" data-target="#multi-test-modal">Test Selected With Email</a>
+                </li>
+                <li class="ml-4">
+                    <button type="submit" class="modal-button btn btn-success" formaction="{% url 'admin:test_selected_with_data' %}" formmethod="POST">Test Selected With Real Data</button>
+                </li>
+            </ul>
+        </div>
+        <table id="templates" class="table-responsive table table-bordered table-striped bg-white">
+            <thead>
+                <tr>
+                    <th><div class="d-flex"><input id="selected-all" type="checkbox" name="all" value="true"><span class="ml-1">All</span></div></th>
+                    <th><div class="d-flex"><input id="selected-all-page" type="checkbox"><span class="ml-1">This page</span></div></th>
+                    <th>Name</th>
+                    <th>Template Name</th>
+                    <th>Subject</th>
+                    <th>Country</th>
+                    <th>From Email</th>
+                    <th>To Email</th>
+                    <th>Related Model Application</th>
+                    <th>Related Model Name</th>
+                    <th>Additional Parameters</th>
+                    <th>Active Status</th>
+                    <th>Test Buttons</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for obj in email_template_objs %}
                     <tr>
-                        <th><input id="selected-all" type="checkbox"></th>
-                        <th>Name</th>
-                        <th>Template Name</th>
-                        <th>Subject</th>
-                        <th>Country</th>
-                        <th>From Email</th>
-                        <th>To Email</th>
-                        <th>Related Model Application</th>
-                        <th>Related Model Name</th>
-                        <th>Additional Parameters</th>
-                        <th>Active Status</th>
-                        <th>Test Buttons</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for obj in email_templates_obj %}
-                        <tr>
-                            <td>
-                                <input type="checkbox" class="selected-row" name="selected" value="{{ obj.id }}">
-                            </td>
-                            <td>{{ obj.name }}</td>
-                            <td>{{ obj.template_name }}</td>
-                            <td>{{ obj.subject }}</td>
-                            <td>{{ obj.country.code }}</td>
-                            <td>{{ obj.from_email }}</td>
-                            <td>{{ obj.to_email }}</td>
-                            <td>{{ obj.related_model_application }}</td>
-                            <td>{{ obj.related_model_name }}</td>
-                            <td>{{ obj.additional_parameters }}</td>
-                            <td>{{ obj.active_status }}</td>
-                            <td class="d-flex gap-1">
+                        <td></td>
+                        <td>
+                            <input type="checkbox" class="selected-row" name="selected" value="{{ obj.id }}">
+                        </td>
+                        <td>{{ obj.name }}</td>
+                        <td>{{ obj.template_name }}</td>
+                        <td>{{ obj.subject }}</td>
+                        <td>{{ obj.country.code }}</td>
+                        <td>{{ obj.from_email }}</td>
+                        <td>{{ obj.to_email }}</td>
+                        <td>{{ obj.related_model_application }}</td>
+                        <td>{{ obj.related_model_name }}</td>
+                        <td>{{ obj.additional_parameters }}</td>
+                        <td>{{ obj.active_status }}</td>
+                        <td>
+                            <div class="d-flex">
                                 <button class="modal-button btn btn-primary" type="submit" formaction="{% url 'admin:test_without_email' obj.id %}" formmethod="POST">Test</button>
-                                <a class="modal-button btn btn-danger" type="button" data-bs-toggle="modal" data-bs-target="#test-with-email-{{ obj.id }}">Test With Email</a>
-                                <button class="modal-button btn btn-success" type="submit" formaction="{% url 'admin:test_with_data' obj.id %}" formmethod="POST">Test With Real Data</button>
-                                <div class="modal fade" id="test-with-email-{{ obj.id }}" tabindex="-1" aria-labelledby="single-test-modal--label" aria-hidden="true">
-                                    <div class="modal-dialog">
+                                <a class="modal-button btn btn-danger ml-3" type="button" data-toggle="modal" data-target="#test-with-email-{{ obj.id }}">Test With Email</a>
+                                <button class="modal-button btn btn-success ml-3" type="submit" formaction="{% url 'admin:test_with_data' obj.id %}" formmethod="POST">Test With Real Data</button>
+                                <div class="modal fade" id="test-with-email-{{ obj.id }}" role="dialog" tabindex="-1" aria-labelledby="single-test-modal--label" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
                                         <div class="modal-content">
                                             <div class="modal-header">
                                                 <h1 class="modal-title fs-5" id="single-test-modal--label">Warning</h1>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
                                             </div>
                                             <div class="modal-body">
                                                 You are going to send {{ obj.template_name }} to corresponding email.
                                             </div>
                                             <div class="modal-footer">
-                                                <button type="button" class="btn btn-success" data-bs-dismiss="modal">Close</button>
+                                                <button type="button" class="btn btn-success" data-dismiss="modal">Close</button>
                                                 <button type="submit" class="btn btn-danger" formaction="{% url 'admin:test_with_email' obj.id %}">Send Email</button>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            <div class="d-flex gap-5">
-                <div>
-                    {{ email_template | safe }}
-                </div>
-                {% for ovm_fields in ovm_fields_list %}
-                    <table class="table h-100 w-auto" style="margin-top: 32px">
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="d-flex gap-5 mt-5">
+            <div class="email-template-overview">
+                {{ email_template | safe }}
+            </div>
+            {% for ovm_fields in ovm_fields_list %}
+                {% if ovm_fields %}
+                    <table class="table h-100 w-auto bg-white">
                         <thead>
                             <tr>
                                 <td colspan="2" class="fw-bold">{{ ovm_fields.template.name|upper }}</td>
@@ -114,26 +115,37 @@
                             {% endfor %}
                         </tbody>
                     </table>
-                {% endfor %}
-            </div>
-            <div class="modal fade" id="multi-test-modal" tabindex="-1" aria-labelledby="multi-test-modal--label" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="multi-test-modal--label">Warning</h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            You are going to send {{ obj.template_name }} to corresponding email.
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-success" data-bs-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-danger" formaction="{% url 'admin:test_selected_with_email' %}" value="Test Selected With Email">Send Email</button>
-                        </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        <div class="modal fade" id="multi-test-modal" tabindex="-1" aria-labelledby="multi-test-modal--label" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="multi-test-modal--label">Warning</h1>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        You are going to send all to corresponding email.
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-success" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-danger" formaction="{% url 'admin:test_selected_with_email' %}" value="Test Selected With Email">Send Email</button>
                     </div>
                 </div>
             </div>
-        </form>
-    </div>
+        </div>
+    </form>
+    <script type="text/javascript" src="{% static 'baseemail/index.js' %}"></script>
+    <script src="//code.jquery.com/jquery-1.12.4.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.13.2/datatables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous" ></script>
+    <script>
+        $(document).ready(function() {
+             $('#templates').DataTable();
+        });
+    </script>
 {% endblock %}
 

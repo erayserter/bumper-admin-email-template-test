@@ -27,14 +27,13 @@ class TestTemplateWithoutEmailAPIView(CreateAPIView):
     permission_classes = [AllowAny, ]
 
     def post(self, request, id=None, *args, **kwargs):
-        template_id = self.kwargs.get('id')
 
         # TODO: get html template from AWS S3
         try:
-            email_template = EmailTemplate.objects.get(pk=template_id)
+            email_template = EmailTemplate.objects.get(pk=self.kwargs.get('id'))
             template_string = render_to_string(f'admin/baseemail/emailtemplate/{email_template.template_name}.html')
         except Exception as e:
-            print(f'Error: {e} Email Template ID: {template_id}')
+            print(f'Error: {e} Email Template ID: {self.kwargs.get("id")}')
             return redirect(reverse('admin:test_template'))
 
         ovm_fields_json = get_template_ovm_fields_json(request, email_template)
@@ -53,21 +52,18 @@ class TestTemplateWithEmailAPIView(CreateAPIView):
     permission_classes = [AllowAny, ]
 
     def post(self, request, id=None, *args, **kwargs):
-        email = request.POST['email']
-        template_id = self.kwargs.get('id')
-
         try:
-            validate_email(email)
+            validate_email(request.POST['email'])
         except Exception as e:
             messages.error(request, 'Invalid Email.')
             return redirect(reverse('admin:test_template'))
 
         # TODO: get html template from AWS S3
         try:
-            email_template = EmailTemplate.objects.get(pk=template_id)
+            email_template = EmailTemplate.objects.get(pk=self.kwargs.get('id'))
             template_string = render_to_string(f'admin/baseemail/emailtemplate/{email_template.template_name}.html')
         except Exception as e:
-            print(f'Error: {e} Email Template ID: {template_id}')
+            print(f'Error: {e} Email Template ID: {self.kwargs.get("id")}')
             return redirect(reverse('admin:test_template'))
 
         ovm_fields_json = get_template_ovm_fields_json(request, email_template)
@@ -84,14 +80,12 @@ class TestTemplateWithDataAPIView(CreateAPIView):
     permission_classes = [AllowAny, ]
 
     def post(self, request, id=None, *args, **kwargs):
-        template_id = self.kwargs.get('id')
-
         # TODO: get html template from AWS S3
         try:
-            email_template = EmailTemplate.objects.get(pk=template_id)
+            email_template = EmailTemplate.objects.get(pk=self.kwargs.get('id'))
             template_string = render_to_string(f'admin/baseemail/emailtemplate/{email_template.template_name}.html')
         except Exception as e:
-            print(f'Error: {e} Email Template ID: {template_id}')
+            print(f'Error: {e} Email Template ID: {self.kwargs.get("id")}')
             return redirect(reverse('admin:test_template'))
 
         ovm_fields_json = get_template_ovm_fields_json(request, email_template)
@@ -112,10 +106,13 @@ class TestTemplateSelectedWithoutEmailAPIView(CreateAPIView):
     permission_classes = [AllowAny, ]
 
     def post(self, request, *args, **kwargs):
-        queryset = EmailTemplate.objects.filter(pk__in=request.POST.getlist('selected'))
+        queryset = EmailTemplate.objects.all()
+
+        if not request.POST.get('all'):
+            queryset = queryset.filter(pk__in=request.POST.getlist('selected'))
 
         ovm_fields_list = []
-
+        # TODO: OVM will be removed
         for query in queryset:
             ovm_fields = get_template_ovm_fields_json(request, query)
             ovm_fields_list.append(ovm_fields)
@@ -134,15 +131,16 @@ class TestTemplateSelectedWithEmailAPIView(CreateAPIView):
     permission_classes = [AllowAny, ]
 
     def post(self, request, *args, **kwargs):
-        email = request.POST['email']
-
         try:
-            validate_email(email)
+            validate_email(request.POST['email'])
         except Exception as e:
             messages.error(request, 'Invalid Email.')
             return redirect(reverse('admin:test_template'))
 
-        queryset = EmailTemplate.objects.filter(pk__in=request.POST.getlist('selected'))
+        queryset = EmailTemplate.objects.all()
+
+        if not request.POST.get('all'):
+            queryset = queryset.filter(pk__in=request.POST.getlist('selected'))
 
         if not queryset:
             messages.error(request, "You should first select templates to test them.")
@@ -166,7 +164,10 @@ class TestTemplateSelectedWithDataAPIView(CreateAPIView):
     permission_classes = [AllowAny, ]
 
     def post(self, request, *args, **kwargs):
-        queryset = EmailTemplate.objects.filter(pk__in=request.POST.getlist('selected'))
+        queryset = EmailTemplate.objects.all()
+
+        if not request.POST.get('all'):
+            queryset = queryset.filter(pk__in=request.POST.getlist('selected'))
 
         if not queryset:
             messages.error(request, "You should first select templates to test them.")
@@ -260,6 +261,7 @@ class EmailTemplateModelAdmin(admin.ModelAdmin):
         return False
 
 
+# TODO: Will be removed
 class CountryModelAdmin(admin.ModelAdmin):
     form = CountryModelForm
     list_per_page = 25
@@ -269,6 +271,7 @@ class CountryModelAdmin(admin.ModelAdmin):
         return False
 
 
+# TODO: Will be removed
 class ObjectVariableMapModelAdmin(admin.ModelAdmin):
     form = ObjectVariableMapModelForm
     list_per_page = 25

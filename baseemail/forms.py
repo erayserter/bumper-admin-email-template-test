@@ -4,6 +4,7 @@ from django.contrib.admin.widgets import AdminTextareaWidget
 from baseemail.models import Country, EmailTemplate, ObjectVariableMap
 
 
+# TODO: Will be removed
 class CountryModelForm(forms.ModelForm):
     class Meta:
         model = Country
@@ -22,6 +23,7 @@ class EmailTemplateModelForm(forms.ModelForm):
         exclude = ('id', )
 
 
+# TODO: Will be removed
 class ObjectVariableMapModelForm(forms.ModelForm):
     class Meta:
         model = ObjectVariableMap

@@ -1,4 +1,4 @@
-const allCheckbox = document.getElementById("selected-all");
+const allCheckbox = document.getElementById("selected-all-page");
 
 allCheckbox.addEventListener('change', (e) => {
     const rowCheckboxes = document.getElementsByClassName("selected-row");

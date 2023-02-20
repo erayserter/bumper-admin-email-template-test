@@ -13,6 +13,10 @@ ul, li {
     color: #fff !important;
 }
 
+#templates {
+    margin-bottom: 16px;
+}
+
 #templates_length label {
     color: #fff;
 }
@@ -36,8 +40,14 @@ ul, li {
 #templates_paginate {
     color: #fff;
     background-color: #fff;
+    padding-bottom: 0.25em;
 }
 
 #templates_paginate span {
     color: #17a2b8;
+}
+
+#templates_paginate span a:hover:not(.current) {
+    background: #ff733c;
+    color: black !important;
 }

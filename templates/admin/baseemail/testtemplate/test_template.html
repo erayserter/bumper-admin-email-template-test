@@ -100,7 +100,7 @@
             </div>
             {% for ovm_fields in ovm_fields_list %}
                 {% if ovm_fields %}
-                    <table class="table h-100 w-auto bg-white">
+                    <table class="table h-100 w-auto bg-white border">
                         <thead>
                             <tr>
                                 <td colspan="2" class="fw-bold">{{ ovm_fields.template.name|upper }}</td>
@@ -144,7 +144,17 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous" ></script>
     <script>
         $(document).ready(function() {
-             $('#templates').DataTable();
+             $('#templates').DataTable({
+                 lengthMenu: [
+                    [1,2,3],
+                    [1,2,3],
+                ],
+                 columnDefs: [
+                     {orderable: false, targets: 0},
+                     {orderable: false, targets: 1}
+                 ],
+                 pagingType: "numbers",
+             });
         });
     </script>
 {% endblock %}

@@ -14,7 +14,7 @@ def replace_variables(request, email_template, html, merge_variables):
             html = html.replace(f'*|{var}|*', merge_variables[var])
 
     # Email template variable regex like *|DEALERSHIP|*. Finds all not replaced variable names.
-    not_found_list = re.findall(r'\*\|(.+)\|\*', html)
+    not_found_list = re.findall(r'\*\|(.+?)\|\*', html)
 
     if not_found_list:
         messages.warning(request, f'{email_template.template_name.upper()}: {not_found_list} variable(s) not found in merge variables')
